@@ -46,7 +46,6 @@ python3 cndcheck.py --filename url.txt
 ```
 
 (4):一键获取真实IP
+
 <img width="844" alt="image" src="https://user-images.githubusercontent.com/53456907/166103196-afeb46ec-0049-4378-8df3-d6b6867faab3.png">
-
-
 
