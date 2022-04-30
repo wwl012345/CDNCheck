@@ -12,6 +12,10 @@
 
 (2):脚本执行完成之后，会在命令行打印出是否存在CDN，也会在当前目录下生成一个result.txt文件，将检测的结果写入，采用的是追加的方式写入到文件中，如果重新检测，可以删除result.txt文件
 
+(3):将国内外节点区分开，在一定程度上可以一键找出真实IP
+- 如果国内有CDN，国外没有CDN，则可以通过国外节点判断出真实IP
+- 如果国外有CDN，国内没有CDN，则可以通过国内节点判断出真实IP
+
 ### 二、用法说明
 
 #### 1.使用方法
@@ -40,5 +44,9 @@ python3 cndcheck.py --url domain
 python3 cndcheck.py -f url.txt
 python3 cndcheck.py --filename url.txt
 ```
+
+(4):一键获取真实IP
+
+<img width="932" alt="image" src="https://user-images.githubusercontent.com/53456907/166103144-4c8ff4d8-7061-407b-bc5b-933bb82b2a42.png">
 
 
