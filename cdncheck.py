@@ -43,7 +43,8 @@ def ping(domain):
     ]
 
     #站长之家节点列表
-    node_list = {
+    #国内节点列表
+    node_list1 = {
         "浙江杭州[电信]": "278d10bf-cbc5-494a-bbab-e76c05b4f3cd",
         "福建泉州[电信]": "bfc066b6-e917-4a60-88c6-d646154b1cf5",
         "辽宁沈阳[多线]": "07f2f1cc-8414-4557-a8c1-27750a732f16",
@@ -69,6 +70,10 @@ def ping(domain):
         "中国香港_1": "cdcf3a45-8366-4ab4-ae80-75eb6c1c9fca",
         "中国香港_2": "a0be885d-24ad-487d-bbb0-c94cd02a137d",
         "中国台湾": "483bad95-d9a8-4026-87f4-7a56501bf5fd",
+    }
+
+    #国外节点列表
+    node_list2 = {
         "韩国CN2": "1f4c5976-8cf3-47e7-be10-aa9270461477",
         "韩国CN联通_1": "dc440a55-1148-480f-90a7-9d1e0269b682",
         "韩国CN联通_2": "6cd2450a-d73d-40c7-96ce-afc20540eeea",
@@ -82,11 +87,10 @@ def ping(domain):
     }
 
     ip_value = ""
-    for n in node_list.keys():
+    for n in node_list1.keys():
         try:
             url = "https://ping.chinaz.com/iframe.ashx?t=ping&callback={}".format(random.choice(callback_list))
-            data = "guid={}&host={}&ishost=0&isipv6=0&encode=g4LFw6M5ZZa9pkSC|tGN8JBHp|lHVl2x&checktype=0".format(
-                node_list[n], domain)
+            data = "guid={}&host={}&ishost=0&isipv6=0&encode=g4LFw6M5ZZa9pkSC|tGN8JBHp|lHVl2x&checktype=0".format(node_list1[n], domain)
             res = requests.post(url=url, headers=headers, data=data, verify=True)
             res_node = res.text
             node_value = re.findall("\({(.*?)}\)", res_node, re.S)
@@ -98,15 +102,37 @@ def ping(domain):
         except Exception as e:
             print('[-] {} 节点请求失败'.format(n))
             continue
-    set_ip = set(re.findall("ip:'(.*?)',", ip_value, re.S))
-    if len(set_ip) > 1:
-        print("[-] 经检测{}可能使用CDN加速，共发现{}个节点：{}\n".format(domain, len(set_ip), ",".join(set_ip)))
-        str1 = "[-] 经检测{}可能使用CDN加速，共发现{}个节点：{}\n".format(domain, len(set_ip), ",".join(set_ip))
+    set_ip1 = set(re.findall("ip:'(.*?)',", ip_value, re.S))
+
+    for n in node_list2.keys():
+        try:
+            url = "https://ping.chinaz.com/iframe.ashx?t=ping&callback={}".format(random.choice(callback_list))
+            data = "guid={}&host={}&ishost=0&isipv6=0&encode=g4LFw6M5ZZa9pkSC|tGN8JBHp|lHVl2x&checktype=0".format(node_list2[n], domain)
+            res = requests.post(url=url, headers=headers, data=data, verify=True)
+            res_node = res.text
+            node_value = re.findall("\({(.*?)}\)", res_node, re.S)
+            if len(node_value[0]) == 14:
+                print("[-] {}节点检测超时".format(n))
+            else:
+                print("[+] {}节点正在检测中...".format(n))
+                ip_value += node_value[0]
+        except Exception as e:
+            print('[-] {} 节点请求失败'.format(n))
+            continue
+    set_ip2 = set(re.findall("ip:'(.*?)',", ip_value, re.S))
+
+    if len(set_ip1) > 1 or len(set_ip2) > 1:
+        print("[-] 经检测{}可能使用CDN加速，请进一步判断真实IP")
+        str1 = "[-] 经检测{}可能使用CDN加速，请进一步判断真实IP"
         with open('result.txt', 'a+') as file:  # 设置文件对象
             file.write(str1)  # 将字符串写入文件中
-    elif len(set_ip) == 1:
-        print("[+] 经检测{}未使用CDN加速，仅发现1个节点：{}\n".format(domain, ",".join(set_ip)))
-        str2 = "[+] 经检测{}未使用CDN加速，仅发现1个节点：{}\n".format(domain, ",".join(set_ip))
+    elif len(set_ip1) == 1 or len(set_ip2) == 1:
+        if len(set_ip1) == 1:
+            print("[+] 经检测{}国内未使用CDN加速，可能的真实IP为：{}\n".format(domain, ",".join(set_ip1)))
+            str2 = "[+] 经检测{}国内未使用CDN加速，可能的真实IP为：{}\n".format(domain, ",".join(set_ip1))
+        else:
+            print("[+] 经检测{}国外未使用CDN加速，真实IP可能为：{}\n".format(domain, ",".join(set_ip2)))
+            str2 = "[+] 经检测{}国外未使用CDN加速，真实IP可能为：{}\n".format(domain, ",".join(set_ip2))
         with open('result.txt', 'a+') as file:  # 设置文件对象
             file.write(str2)  # 将字符串写入文件中
     else:
